@@ -1,9 +1,11 @@
-package findPrimeNumber;
+package findPrimeNumber; ######### the package name is not good, should use noun instead of verb or sentence
 
-import java.util.*;
+import java.util.*; ######## avoid to use any * unless there are more than 5 or 6 imports from this package
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+########## or import java... should below import com.google....... all imports should follow the order of alphabets
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -17,7 +19,7 @@ public class PrimeNumberCalculator {
   private ExecutorService executorService;
 
   private final List<Boolean> primeNumberFlags; // Flags indicating whether a
-                                                // number is prime or not.
+                                                // number is prime or not. #####instead of separate the comments in different lines, I would rather making them a new line.
   private final int upperBound;
   private long startTime;
   private long elapsedTime;
@@ -40,7 +42,10 @@ public class PrimeNumberCalculator {
    *          CurrentTime object used to get current time.
    */
   @Inject
-  public PrimeNumberCalculator(@Named("upperBound") Integer upperBound,
+  public PrimeNumberCalculator(@Named("upperBound") Integer upperBound, 
+  ########## in general, instead of using named, I would prefer annotation while in your case, named is good
+  ################## why ? Because annotation can be reused convenient instead of typing the string inside named everytime
+  ################## which makes errors easier to detect (String is easily to false type).
       @Named("numThreads") Integer numThreads,
       @Named("minLengthForEachWorker") Integer minLengthForEachWorker,
       PrimeNumberWorkerFactory factory, CurrentTime currentTime) {
@@ -59,7 +64,7 @@ public class PrimeNumberCalculator {
 
   private void refreshCalculator() {
     executorService = Executors.newCachedThreadPool();
-    Collections.fill(primeNumberFlags, Boolean.FALSE);
+    Collections.fill(primeNumberFlags, Boolean.FALSE); ######## just use false, boxing process from boolean to Boolean is fine...
   }
 
   /**
@@ -75,12 +80,12 @@ public class PrimeNumberCalculator {
     startTime = currentTime.NowMillis();
     refreshCalculator();
 
-    ArrayList<Integer> result = new ArrayList<Integer>();
-    if (upperBound < 2)
+    ArrayList<Integer> result = new ArrayList<Integer>(); ######actually you can write List<Integer> result = new ArrayList<>();
+    if (upperBound < 2) ############ prefer to have {}
       return result;
 
     if (upperBound == 2) {
-      result.add(new Integer(2));
+      result.add(new Integer(2)); ######## that's ok to have boxing process here
       return result;
     }
 
@@ -101,7 +106,16 @@ public class PrimeNumberCalculator {
       Set<Callable<Integer>> callables = new HashSet<Callable<Integer>>();
       for (int i = 0; i < numTasks; ++i) {
         if (i < numTasks - 1) {
-          callables.add(factory.create(currentNumSquared + i * range, currentNumSquared + (i + 1)
+          ####### stack parameters of this method for better readability
+          ###########like:
+          callables.add(
+              factory.create(currentNumSquared + i * range, 
+              currentNumSquared + (i + 1) * range, 
+              currentNum, 
+              i, 
+              primeNumberFlags));
+        #######################################     Same below  
+          callables.add(factory.create(currentNumSquared + i * range, currentNumSquared + (i + 1) 
               * range, currentNum, i, primeNumberFlags));
         } else {
           callables.add(factory.create(currentNumSquared + i * range, upperBound, currentNum, i,
@@ -111,7 +125,7 @@ public class PrimeNumberCalculator {
       try {
         executorService.invokeAll(callables);
       } catch (InterruptedException e) {
-        e.printStackTrace();
+        e.printStackTrace(); ####### I would rather throw the exception...print wouldn't work in our system.
       }
       currentNum = updateCurrentNum(currentNum);
     }
@@ -167,7 +181,7 @@ public class PrimeNumberCalculator {
      * @param primeNumberFlags
      *          Flags indicating whether a number is prime or not.
      */
-    @Inject
+    @Inject ########### stack these parameters
     public WorkerThread(@Assisted("workerLowerBound") Integer workerLowerBound,
         @Assisted("workerUpperBound") Integer workerUpperBound, @Assisted("target") Integer target,
         @Assisted("index") Integer index, @Assisted List<Boolean> primeNumberFlags) {
