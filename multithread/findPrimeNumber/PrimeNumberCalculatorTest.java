@@ -1,6 +1,6 @@
 package findPrimeNumber;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.*; ###### as is mentioned, avoid *
 
 import java.io.File;
 import java.io.IOException;
@@ -46,6 +46,14 @@ public class PrimeNumberCalculatorTest {
    */
   @Test
   public void testPrimeNumberLessThan500() {
+    ############# instead of creating injector here, you may want to have a method like:
+    private Injector inject;
+    @Before
+    public void setUp(){
+      create injector
+    }
+    ##########################
+    
     Injector injector = Guice.createInjector(new PrimeNumberCalculationModule(500, numThreads,
         minLengthForEachWorker));
     PrimeNumberCalculator theCalculator = injector.getInstance(PrimeNumberCalculator.class);
@@ -72,7 +80,7 @@ public class PrimeNumberCalculatorTest {
    * 
    */
   @Parameters(name = "{index}: numThreads:{0}, minLengthForEachWorker:{1}")
-  public static Iterable<Object[]> data1() {
+  public static Iterable<Object[]> data1() {    ######### data1 or data (no data2 ?)
     return Arrays.asList(new Object[][] {
         { 1, 1, 4 },
         { 5, 1, 5 },
@@ -82,5 +90,5 @@ public class PrimeNumberCalculatorTest {
         { 10, 200, 1 } 
         });
   }
-
+###### delete useless line
 }
