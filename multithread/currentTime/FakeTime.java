@@ -8,11 +8,11 @@ package currentTime;
  * 
  */
 public class FakeTime implements CurrentTime {
-  private long fakeCurrentTime = 0;
+  private long fakeCurrentTime = 0; ##############   0L
   private long fakeTimeStep;
 
   /**
-   * 
+   * ############### delete useless line here and else where
    * @param fakeTimeStep
    *          : The fake elapsed time between two "NowMillis" calls.
    */
@@ -21,12 +21,12 @@ public class FakeTime implements CurrentTime {
   }
 
   /**
-   * @return fake current time
+   * @return fake current time ########### the comments here is not that clear, since you update the fakeCurrentTime
    */
   public long NowMillis() {
     long result = fakeCurrentTime;
     fakeCurrentTime += fakeTimeStep;
     return result;
   }
-
+########### delete this line
 }
