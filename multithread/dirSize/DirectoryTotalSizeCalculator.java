@@ -71,10 +71,10 @@ public class DirectoryTotalSizeCalculator {
    * @param currentTime
    *          CurrentTime object used to get current time.
    */
-  @Inject
+  @Inject ###### stack parameters
   public DirectoryTotalSizeCalculator(@Named("numThreads") Integer numThreads,
       SizeCalculatorFactory factory, CurrentTime currentTime) {
-    if (numThreads <= 0)
+    if (numThreads <= 0) ###### {}
       throw new IllegalArgumentException("The number of threads allowed to use should be positive");
     this.numThreads = numThreads;
     this.subDirectoryName = new LinkedBlockingQueue<String>();
@@ -103,7 +103,7 @@ public class DirectoryTotalSizeCalculator {
     try {
       subDirectoryName.put(directoryName);
     } catch (InterruptedException e) {
-      e.printStackTrace();
+      e.printStackTrace(); ######### throw it
     }
     fileInQueue.set(1);
     totalSize.set(0);
@@ -113,7 +113,7 @@ public class DirectoryTotalSizeCalculator {
     try {
       executorService.invokeAll(workers);
     } catch (InterruptedException e) {
-      e.printStackTrace();
+      e.printStackTrace(); ######## throw it
     }
     executorService.shutdown();
     elapsedTime = currentTime.NowMillis() - startTime;
@@ -151,7 +151,7 @@ public class DirectoryTotalSizeCalculator {
     private AtomicInteger fileInQueue;
     private final int numThreads;
 
-    @Inject
+    @Inject ####### stack parameters
     public SizeCalculator(@Assisted("index") Integer index,
         @Assisted LinkedBlockingQueue<String> subDirectoryName, @Assisted AtomicLong totalSize,
         @Assisted AtomicInteger fileInQueue, @Assisted("numThreads") Integer numThreads) {
@@ -181,7 +181,7 @@ public class DirectoryTotalSizeCalculator {
           }
           totalSize.addAndGet(calculateCurrentDirectorySize(currentDirectoryName));
         } catch (InterruptedException e) {
-          e.printStackTrace();
+          e.printStackTrace(); 
         }
       }
     }
