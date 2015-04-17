@@ -1,5 +1,5 @@
 package findPrimeNumber;
-
+######### order of imports
 import java.util.concurrent.Callable;
 
 import com.google.inject.AbstractModule;
@@ -39,6 +39,10 @@ public class PrimeNumberCalculationModule extends AbstractModule {
    *          it only matters if "fakeTimeOption" is "true". Used to construct a
    *          fake time object.
    */
+   ####### stack these parameters.
+   
+  ########### I would rather to have seperate modules, one for real and one for test. shouldn't be mixed together.
+  
   public PrimeNumberCalculationModule(int upperBound, int numThreads, int minLengthForEachWorker,
       boolean fakeTimeOption, int fakeTimeStep) {
     this.upperBound = upperBound;
@@ -57,17 +61,20 @@ public class PrimeNumberCalculationModule extends AbstractModule {
   }
 
   @Override
-  protected void configure() {
+  protected void configure() { 
+    ###### indents +4
     install(new FactoryModuleBuilder().implement(new TypeLiteral<Callable<Integer>>() {
     }, PrimeNumberCalculator.WorkerThread.class).build(PrimeNumberWorkerFactory.class));
     bind(Integer.class).annotatedWith(Names.named("upperBound"))
-        .toInstance(new Integer(upperBound));
+        .toInstance(new Integer(upperBound)); ######## I don't know whether it will throw exception, prefer .toInstance(upperBound)
+        ####### please check: http://stackoverflow.com/questions/13098143/java-integer-constant-pool
     bind(Integer.class).annotatedWith(Names.named("numThreads"))
         .toInstance(new Integer(numThreads));
-    bind(Integer.class).annotatedWith(Names.named("minLengthForEachWorker")).toInstance(
+    bind(Integer.class).annotatedWith(Names.named("minLengthForEachWorker")).toInstance( ##### move .toInstance to next line
         new Integer(minLengthForEachWorker));
     if (fakeTimeOption) {
-      bind(CurrentTime.class).toInstance(new FakeTime(fakeTimeStep));
+      bind(CurrentTime.class).toInstance(new FakeTime(fakeTimeStep)); ##### I wouldn't prefer toInstance, I would rather to have a provider
+      ######## because it introduces a global singleton which is not necessary and may instroduce un-expected behavior.
     } else {
       bind(CurrentTime.class).to(SystemCurrentTime.class);
     }
