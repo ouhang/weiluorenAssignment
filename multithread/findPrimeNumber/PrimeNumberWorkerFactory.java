@@ -1,7 +1,7 @@
 package findPrimeNumber;
 
 import java.util.List;
-
+###### order
 import com.google.inject.assistedinject.Assisted;
 /**
  * Interface used in Assist Inject for the factory providing 
@@ -9,6 +9,8 @@ import com.google.inject.assistedinject.Assisted;
  * @author weiluo
  *
  */
+ 
+ ###### stack parameters
 public interface PrimeNumberWorkerFactory {
   public PrimeNumberCalculator.WorkerThread create(@Assisted("workerLowerBound") Integer workerLowerBound,
       @Assisted("workerUpperBound") Integer workerUpperBound,
