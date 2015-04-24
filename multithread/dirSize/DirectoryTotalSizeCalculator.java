@@ -1,5 +1,9 @@
 package dirSize;
 
+import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.name.Named;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -8,13 +12,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-
-import com.google.inject.Inject;
-import com.google.inject.assistedinject.Assisted;
-import com.google.inject.name.Named;
 
 import currentTime.CurrentTime;
 
@@ -71,11 +69,14 @@ public class DirectoryTotalSizeCalculator {
    * @param currentTime
    *          CurrentTime object used to get current time.
    */
-  @Inject ###### stack parameters
-  public DirectoryTotalSizeCalculator(@Named("numThreads") Integer numThreads,
-      SizeCalculatorFactory factory, CurrentTime currentTime) {
-    if (numThreads <= 0) ###### {}
+  @Inject 
+  public DirectoryTotalSizeCalculator(
+      @Named("numThreads") Integer numThreads,
+      SizeCalculatorFactory factory, 
+      CurrentTime currentTime) {
+    if (numThreads <= 0) {
       throw new IllegalArgumentException("The number of threads allowed to use should be positive");
+    }
     this.numThreads = numThreads;
     this.subDirectoryName = new LinkedBlockingQueue<String>();
     this.totalSize = new AtomicLong(0);
@@ -95,26 +96,23 @@ public class DirectoryTotalSizeCalculator {
    *          the name of directory whose total size to be computed.
    *          
    * @return The total size of the directory
+   * @throws InterruptedException 
    */
-  public long computeTotalSize(String directoryName) {
+  public long computeTotalSize(String directoryName) throws InterruptedException {
     executorService = Executors.newFixedThreadPool(this.numThreads);
 
     startTime = currentTime.NowMillis();
-    try {
-      subDirectoryName.put(directoryName);
-    } catch (InterruptedException e) {
-      e.printStackTrace(); ######### throw it
-    }
+  
+    subDirectoryName.put(directoryName);
+
     fileInQueue.set(1);
     totalSize.set(0);
 
     startThreads();
 
-    try {
-      executorService.invokeAll(workers);
-    } catch (InterruptedException e) {
-      e.printStackTrace(); ######## throw it
-    }
+
+    executorService.invokeAll(workers);
+
     executorService.shutdown();
     elapsedTime = currentTime.NowMillis() - startTime;
     return totalSize.get();
@@ -151,10 +149,13 @@ public class DirectoryTotalSizeCalculator {
     private AtomicInteger fileInQueue;
     private final int numThreads;
 
-    @Inject ####### stack parameters
-    public SizeCalculator(@Assisted("index") Integer index,
-        @Assisted LinkedBlockingQueue<String> subDirectoryName, @Assisted AtomicLong totalSize,
-        @Assisted AtomicInteger fileInQueue, @Assisted("numThreads") Integer numThreads) {
+    @Inject 
+    public SizeCalculator(
+        @Assisted("index") Integer index,
+        @Assisted LinkedBlockingQueue<String> subDirectoryName,
+        @Assisted AtomicLong totalSize,
+        @Assisted AtomicInteger fileInQueue,
+        @Assisted("numThreads") Integer numThreads) {
       this.index = index;
       this.subDirectoryName = subDirectoryName;
       this.totalSize = totalSize;

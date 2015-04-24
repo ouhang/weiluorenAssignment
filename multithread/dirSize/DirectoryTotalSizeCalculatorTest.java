@@ -1,12 +1,10 @@
 package dirSize;
 
-import static org.junit.Assert.*;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Arrays;
-
+import static org.junit.Assert.assertEquals;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -14,8 +12,10 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Arrays;
 
 @RunWith(value = Parameterized.class)
 public class DirectoryTotalSizeCalculatorTest {
@@ -107,9 +107,10 @@ public class DirectoryTotalSizeCalculatorTest {
    * Test "computeTotalSize" and "getTotalSize"
    * 
    * @throws IOException
+   * @throws InterruptedException 
    */
   @Test
-  public void testGetTotalSize() throws IOException {
+  public void testGetTotalSize() throws IOException, InterruptedException {
     Injector injector = Guice.createInjector(new DirectoryTotalSizeModule(numThreads));
     File folderLocationFile = folder.getRoot();
     Long totalSize = prepareTempFolder();
@@ -118,16 +119,16 @@ public class DirectoryTotalSizeCalculatorTest {
     assertEquals(totalSize,
         new Long(theCalculator.computeTotalSize(folderLocationFile.getCanonicalPath())));
     assertEquals(totalSize.longValue(), theCalculator.getTotalSize());
-
   }
 
   /**
    * Test "getElapsedTime"
    * 
    * @throws IOException
+   * @throws InterruptedException 
    */
   @Test
-  public void testElapsedTime() throws IOException {
+  public void testElapsedTime() throws IOException, InterruptedException {
     Injector injector = Guice.createInjector(new DirectoryTotalSizeModule(numThreads, true,
         fakeTimeStep));
     File folderLocationFile = folder.getRoot();
@@ -136,7 +137,6 @@ public class DirectoryTotalSizeCalculatorTest {
         .getInstance(DirectoryTotalSizeCalculator.class);
     theCalculator.computeTotalSize(folderLocationFile.getCanonicalPath());
     assertEquals(fakeTimeStep, theCalculator.getElapsedTime());
-
   }
 
 }

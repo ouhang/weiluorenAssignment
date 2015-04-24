@@ -8,25 +8,25 @@ package currentTime;
  * 
  */
 public class FakeTime implements CurrentTime {
-  private long fakeCurrentTime = 0; ##############   0L
+  private long fakeCurrentTime = 0L;
   private long fakeTimeStep;
 
   /**
-   * ############### delete useless line here and else where
    * @param fakeTimeStep
    *          : The fake elapsed time between two "NowMillis" calls.
    */
-  public FakeTime(long fakeTimeStep) {
+  public FakeTime(Long fakeTimeStep) {
     this.fakeTimeStep = fakeTimeStep;
   }
 
   /**
-   * @return fake current time ########### the comments here is not that clear, since you update the fakeCurrentTime
+   * The fake current time would be updated by being added with fake time step,
+   * and it will be returned after the update.
+   * @return fake current time
    */
   public long NowMillis() {
     long result = fakeCurrentTime;
     fakeCurrentTime += fakeTimeStep;
     return result;
   }
-########### delete this line
 }

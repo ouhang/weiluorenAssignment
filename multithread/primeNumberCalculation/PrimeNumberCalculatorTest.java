@@ -1,27 +1,27 @@
-package findPrimeNumber;
+package primeNumberCalculation;
 
-import static org.junit.Assert.*; ###### as is mentioned, avoid *
+import static org.junit.Assert.assertEquals;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized.Parameters;
 import org.junit.runners.Parameterized;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 @RunWith(value = Parameterized.class)
 public class PrimeNumberCalculatorTest {
   final int numThreads;
   final int minLengthForEachWorker;
   private final int fakeTimeStep;
-
+  private Injector injector;
   private List<Integer> correctPrimeLessThan500 = new ArrayList<Integer>(Arrays.asList(2, 3, 5, 7,
       11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103,
       107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197,
@@ -29,7 +29,10 @@ public class PrimeNumberCalculatorTest {
       311, 313, 317, 331, 337, 347, 349, 353, 359, 367, 373, 379, 383, 389, 397, 401, 409, 419,
       421, 431, 433, 439, 443, 449, 457, 461, 463, 467, 479, 487, 491, 499));
                                                     // Correct set of prime numbers less than 500.
-  
+  @Before
+  public void setUp(){
+    
+  }
   /**
    * Parameters are used to construct PrimeNumberCalculator and FakeTime
    * objects.
@@ -43,18 +46,11 @@ public class PrimeNumberCalculatorTest {
 
   /**
    * Test the Prime Number Calculation.
+   * @throws InterruptedException 
    */
   @Test
-  public void testPrimeNumberLessThan500() {
-    ############# instead of creating injector here, you may want to have a method like:
-    private Injector inject;
-    @Before
-    public void setUp(){
-      create injector
-    }
-    ##########################
-    
-    Injector injector = Guice.createInjector(new PrimeNumberCalculationModule(500, numThreads,
+  public void testPrimeNumberLessThan500() throws InterruptedException {  
+    injector = Guice.createInjector(new PrimeNumberCalculationModule(500, numThreads,
         minLengthForEachWorker));
     PrimeNumberCalculator theCalculator = injector.getInstance(PrimeNumberCalculator.class);
     List<Integer> result = theCalculator.run();
@@ -63,16 +59,16 @@ public class PrimeNumberCalculatorTest {
 
   /**
    * Test "getElapsedTime"
+   * @throws InterruptedException 
    */
   @Test
-  public void testElapsedTime() throws IOException {
-    Injector injector = Guice.createInjector(new PrimeNumberCalculationModule(500, numThreads,
-        minLengthForEachWorker, true, fakeTimeStep));
+  public void testElapsedTime() throws IOException, InterruptedException {
+    injector = Guice.createInjector(new PrimeNumberCalculationTestModule(500, numThreads,
+        minLengthForEachWorker, fakeTimeStep));
     PrimeNumberCalculator theCalculator = injector.getInstance(PrimeNumberCalculator.class);
     List<Integer> result = theCalculator.run();
     assertEquals(correctPrimeLessThan500, result);
     assertEquals(fakeTimeStep, theCalculator.getElapsedTime());
-
   }
 
   /**
@@ -80,7 +76,7 @@ public class PrimeNumberCalculatorTest {
    * 
    */
   @Parameters(name = "{index}: numThreads:{0}, minLengthForEachWorker:{1}")
-  public static Iterable<Object[]> data1() {    ######### data1 or data (no data2 ?)
+  public static Iterable<Object[]> data() {    
     return Arrays.asList(new Object[][] {
         { 1, 1, 4 },
         { 5, 1, 5 },
@@ -90,5 +86,4 @@ public class PrimeNumberCalculatorTest {
         { 10, 200, 1 } 
         });
   }
-###### delete useless line
 }
