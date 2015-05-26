@@ -5,13 +5,14 @@ import mpi.Status;
 
 import java.util.ArrayList;
 import java.util.List;
-
-
+######## I still hope you can use Guice for all java program
+######## don't leave many spaces here
 
 public class GameOfLife {
   public final static int numberOfRows = 16;
   public final static int numberOfCols = 16;
   public final int global_grid[] = 
+  ######## indent here is 4 not 2
     { 0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
       0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,
       1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -45,18 +46,20 @@ public class GameOfLife {
     int rank = MPI.COMM_WORLD.Rank();
     int size = MPI.COMM_WORLD.Size();
     int numberOfSteps = 60;
-    GameOfLife worker = new GameOfLife(rank, size, numberOfSteps);
+    GameOfLife worker = new GameOfLife(rank, size, numberOfSteps); ######## why name it worker ?
     worker.run();
     MPI.Finalize();
   }
   /**
    * The GameOfLife instance with rank 0 is responsible to update the grid.
    * Other instances are only responsible to calculate the new state for the grid,
-   * then send the new state to the instance with rank 0.
+   * then send the new state to the instance with rank 0. 
    * @param rank: The rank assigned by MPI.
    * @param size: The number of processes used in the MPI program.
    * @param numberOfSteps: The number of steps we will run for the Game of Life.
    */
+   
+   ######### then I would call the instance with rank 0: master, others: slave
   public GameOfLife(int rank, int size, int numberOfSteps) {
     this.rank = rank;
     this.size = size;
@@ -70,7 +73,7 @@ public class GameOfLife {
    * @param colIndex: the column index of the element.
    * @return: the value of the element at such coordinate.
    */
-  private int grid_element(int rowIndex, int colIndex) {
+  private int grid_element(int rowIndex, int colIndex) { ######## method name should start with verb
     return global_grid[rowIndex * numberOfCols + colIndex];
   }
   
@@ -80,7 +83,7 @@ public class GameOfLife {
    * @param coord: The coordinate of the element.
    * @return: the value of the element at such coordinate.
    */
-  private int grid_element(Coordinate coord) {
+  private int grid_element(Coordinate coord) { ######## method name and I don't know why here you have two grid_element methods
     return grid_element(coord.rowIndex, coord.colIndex);
   }
   /**
@@ -126,15 +129,21 @@ public class GameOfLife {
     * @return: a list containing the coordinates of all the neighbors
     * of the element at (rowIndex, colIndex).
     */
-  private List<Coordinate> allNeighbors(int rowIndex, int colIndex) {
+    ########### please indicate that this method will return empty list or not
+  private List<Coordinate> allNeighbors(int rowIndex, int colIndex) { ####### method name should start with verb
     List<Coordinate> result = new ArrayList<Coordinate>();
     for (int rowI = -1; rowI <= 1; ++rowI) {
       for (int colI = -1; colI <= 1; ++colI) {
-        if (colI == 0 && rowI == 0)
+        if (colI == 0 && rowI == 0) ######## please add {} to the body of for loop
           continue;
         int neighborRowIndex = rowIndex + rowI;
         int neighborColIndex = colIndex + colI;
         if (neighborColIndex >= 0 && neighborColIndex <= numberOfCols - 1 && neighborRowIndex >= 0
+        ####### stack it like:
+        ######if (neighborColIndex >= 0
+                  && neighborColIndex <= numberOfCols - 1
+                  && ....
+        ####### Actually instead of using a for loop I would rather you wrote the case for every direction which is more clear
             && neighborRowIndex <= numberOfRows - 1) {
           result.add(new Coordinate(neighborRowIndex, neighborColIndex));
         }
@@ -154,7 +163,7 @@ public class GameOfLife {
    */
   private int calcNeighbors(int rowIndex, int colIndex) {
     int result = 0;
-    int deadOrAliveMuliplier = (grid_element(rowIndex, colIndex) > 0) ? 1 : (-1);
+    int deadOrAliveMuliplier = (grid_element(rowIndex, colIndex) > 0) ? 1 : (-1); #####it's ok to make it -1 instead of (-1)
     List<Coordinate> neighbors = allNeighbors(rowIndex, colIndex);
     for (Coordinate coord : neighbors) {
       result += grid_element(coord);
@@ -178,7 +187,7 @@ public class GameOfLife {
    * of the new state from all other instances and then update the grid.
    * It will also print out the current state at each step.
    */
-  private void runningFirstWorker() {
+  private void runningFirstWorker() { ######## the name of the method is misleading, why call it "first" ?
     for (int tick = 0; tick <= numberOfSteps; ++tick) {
       printGrid();
       if (tick == numberOfSteps) terminationMsg[0] = -1;
@@ -205,10 +214,10 @@ public class GameOfLife {
    * If the rank is even, it will first receive messages from its neighbors and then send out messages.
    * If the rank is odd, it will first send out messages and then receive messages.
    */
-  private void runningOtherWorkers() {
+  private void runningOtherWorkers() { ############## running slaves / or a better name to indicate their responsibility
     while (true) {
       Status mps = MPI.COMM_WORLD.Recv(terminationMsg, 0, 1, MPI.INT, 0, 96);
-      if (terminationMsg[0] < 0) break;
+      if (terminationMsg[0] < 0) break; ########## always havve {}
       if (rank % 2 == 0) {
         receiveFromAdjacentWorkers();
         sendToAdjacentWorkers();
@@ -217,7 +226,7 @@ public class GameOfLife {
         receiveFromAdjacentWorkers();
       }  
       updateLocalRows();
-      MPI.COMM_WORLD.Send(global_grid, rank * rowStepsForEachWorker * numberOfCols,
+      MPI.COMM_WORLD.Send(global_grid, rank * rowStepsForEachWorker * numberOfCols, ####### stack parameters
           rowStepsForEachWorker * numberOfCols, MPI.INT, 0, 97);
     }
   }
@@ -226,11 +235,11 @@ public class GameOfLife {
    */
   private void receiveFromAdjacentWorkers() {
     if (rank > 0) {
-      Status mps = MPI.COMM_WORLD.Recv(global_grid, (rank - 1) * rowStepsForEachWorker * numberOfCols,
+      Status mps = MPI.COMM_WORLD.Recv(global_grid, (rank - 1) * rowStepsForEachWorker * numberOfCols, ####### stack parameters
         rowStepsForEachWorker * numberOfCols, MPI.INT, rank - 1, 99);
     }
     if (rank < size - 1) {
-      Status mps = MPI.COMM_WORLD.Recv(global_grid, (rank + 1) * rowStepsForEachWorker * numberOfCols,
+      Status mps = MPI.COMM_WORLD.Recv(global_grid, (rank + 1) * rowStepsForEachWorker * numberOfCols, ####### stack parameters
           rowStepsForEachWorker * numberOfCols, MPI.INT, rank + 1, 98);
     }
   }
@@ -251,23 +260,23 @@ public class GameOfLife {
    * Update locally the elements in the grid that this process is responsible for.
    */
   private void updateLocalRows() {
-    for (int rowIndex = rank * rowStepsForEachWorker; rowIndex < (rank + 1)
+    for (int rowIndex = rank * rowStepsForEachWorker; rowIndex < (rank + 1) ####### stack the parameters for for-loop
         * rowStepsForEachWorker; ++rowIndex) {
       for (int colIndex = 0; colIndex < numberOfCols; ++colIndex) {
         neighborInfoGrid[rowIndex * numberOfCols + colIndex] = calcNeighbors(rowIndex, colIndex);
       }
     }
-    for (int rowIndex = rank * rowStepsForEachWorker; rowIndex < (rank + 1)
+    for (int rowIndex = rank * rowStepsForEachWorker; rowIndex < (rank + 1) ###### stack parameters
         * rowStepsForEachWorker; ++rowIndex) {
       for (int colIndex = 0; colIndex < numberOfCols; ++colIndex) {
         if (neighborInfoGrid[rowIndex * numberOfCols + colIndex] == -3) {
           global_grid[rowIndex * numberOfCols + colIndex] = 1;
         } else if (neighborInfoGrid[rowIndex * numberOfCols + colIndex] > 0
-            && (neighborInfoGrid[rowIndex * numberOfCols + colIndex] < 2 || neighborInfoGrid[rowIndex
+            && (neighborInfoGrid[rowIndex * numberOfCols + colIndex] < 2 || neighborInfoGrid[rowIndex ######stack parameters in if
                 * numberOfCols + colIndex] > 3)) {
           global_grid[rowIndex * numberOfCols + colIndex] = 0;
         }
-
+######## delete empty line here
       }
     } 
   }
