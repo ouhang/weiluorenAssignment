@@ -55,7 +55,7 @@ public class DirectoryTotalSizeCalculatorTest {
    * @return the total size of such directory
    * @throws IOException
    */
-  private Long prepareTempFolder() throws IOException {
+  private Long prepareTempFolder() throws IOException { ####### why I didn't see the case that there are more than 2 levels of directories ?
     File createdFile = folder.newFile("createdFile");
     long numChars = 1000;
     addOneFile(createdFile, 1000);
@@ -87,7 +87,7 @@ public class DirectoryTotalSizeCalculatorTest {
     out.print(stringInFile);
     out.close();
   }
-
+########## consider to combine the two addOneFile helper functions
   /**
    * Helper function to construct a new file with given size.
    * 
@@ -129,8 +129,18 @@ public class DirectoryTotalSizeCalculatorTest {
    */
   @Test
   public void testElapsedTime() throws IOException, InterruptedException {
+    ####### try to use Guiceberry for guice injection for the junit test
+    
     Injector injector = Guice.createInjector(new DirectoryTotalSizeModule(numThreads, true,
         fakeTimeStep));
+####### change above to
+    Injector injector = Guice.createInjector(new DirectoryTotalSizeModule(
+        numThreads,
+        true,
+        fakeTimeStep));
+
+#######
+        
     File folderLocationFile = folder.getRoot();
     prepareTempFolder();
     DirectoryTotalSizeCalculator theCalculator = injector
