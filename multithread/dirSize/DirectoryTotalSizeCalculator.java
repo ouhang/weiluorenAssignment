@@ -35,7 +35,7 @@ public class DirectoryTotalSizeCalculator {
   private final SizeCalculatorFactory factory;
   private final CurrentTime currentTime;
 
-
+######### delete empty lines
 
   /**
    * Method that is called only after a calling of "computeTotalSize" to get the
@@ -109,7 +109,7 @@ public class DirectoryTotalSizeCalculator {
     totalSize.set(0);
 
     startThreads();
-
+###### delete empty lines
 
     executorService.invokeAll(workers);
 
@@ -123,7 +123,7 @@ public class DirectoryTotalSizeCalculator {
    * threads is given when the DirectoryTotalSize object is constructed.
    */
   private void startThreads() {
-    workers = new ArrayList<Callable<Integer>>();
+    workers = new ArrayList<Callable<Integer>>(); ####### why initiate it every time starts the threads?
 
     for (int i = 0; i < numThreads; ++i) {
       workers.add(factory.create(i, subDirectoryName, totalSize, fileInQueue, numThreads));
@@ -141,7 +141,7 @@ public class DirectoryTotalSizeCalculator {
    * @author weiluo
    * 
    */
-
+####### should this class be public ?
   public static class SizeCalculator implements Callable<Integer> {
     private final int index;
     private final LinkedBlockingQueue<String> subDirectoryName;
@@ -200,7 +200,7 @@ public class DirectoryTotalSizeCalculator {
     private long calculateCurrentDirectorySize(String directoryName) {
       // System.out.println(getName()+" "+directoryName+" ");
       File directory = new File(directoryName);
-      if (!(directory.isDirectory() && directory.canRead()))
+      if (!(directory.isDirectory() && directory.canRead())) ########### {}
         throw new IllegalArgumentException();
       File[] allFiles = directory.listFiles();
       long directorySize = 0;
@@ -220,7 +220,7 @@ public class DirectoryTotalSizeCalculator {
         }
       }
       synchronized (fileInQueue) {
-        if (fileInQueue.get() == 1)
+        if (fileInQueue.get() == 1) ##### add {}
           addSpecialDirectoryNames();
         else
           fileInQueue.decrementAndGet();
@@ -245,7 +245,7 @@ public class DirectoryTotalSizeCalculator {
      * the thread pool that all the tasks are done, and they can safely exit.
      */
     private void addSpecialDirectoryNames() {
-      for (int i = 0; i < numThreads; ++i)
+      for (int i = 0; i < numThreads; ++i) ###### add {}
         try {
           subDirectoryName.put(specialDirectoryName);
         } catch (InterruptedException e) {
