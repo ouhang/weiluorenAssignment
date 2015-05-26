@@ -18,7 +18,7 @@ import currentTime.SystemCurrentTime;
  * 
  */
 public class DirectoryTotalSizeModule extends AbstractModule {
-  final Integer numThreads;
+  final Integer numThreads; #################### they should be private ?
   final boolean fakeTimeOption;
   final long fakeTimeStep;
 
@@ -33,7 +33,7 @@ public class DirectoryTotalSizeModule extends AbstractModule {
    *          fake time object.
    */
   public DirectoryTotalSizeModule(int numThreads, boolean fakeTimeOption, long fakeTimeStep) {
-    if (numThreads <= 0)
+    if (numThreads <= 0) ########### use {}
       throw new IllegalArgumentException("The number of threads allowed to use should be positive");
     this.numThreads = numThreads;
     this.fakeTimeOption = fakeTimeOption;
@@ -42,7 +42,7 @@ public class DirectoryTotalSizeModule extends AbstractModule {
 
   public DirectoryTotalSizeModule(int numThreads) {
     this(numThreads, false, 0);
-
+######## delete this empty line
   }
 
   public DirectoryTotalSizeModule() {
@@ -51,7 +51,8 @@ public class DirectoryTotalSizeModule extends AbstractModule {
 
   @Override
   protected void configure() {
-
+######## delete this empty line
+########## instead of using Names.named, I would prefer non-string annotation
     bind(Integer.class).annotatedWith(Names.named("numThreads")).toInstance(numThreads);
     if (fakeTimeOption) {
       bind(CurrentTime.class).toInstance(new FakeTime(fakeTimeStep));
@@ -60,5 +61,9 @@ public class DirectoryTotalSizeModule extends AbstractModule {
     }
     install(new FactoryModuleBuilder().implement(new TypeLiteral<Callable<Integer>>() {
     }, DirectoryTotalSizeCalculator.SizeCalculator.class).build(SizeCalculatorFactory.class));
+####### change above to:
+### install(new FactoryModuleBuilder()
+        .implement(new TypeLiteral<Callable<Integer>>() {}, DirectoryTotalSizeCalculator.SizeCalculator.class)
+        .build(SizeCalculatorFactory.class));
   }
 }
