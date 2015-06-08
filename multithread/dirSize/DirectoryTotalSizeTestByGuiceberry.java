@@ -1,57 +1,34 @@
 package dirSize;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-
 import static org.junit.Assert.assertEquals;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Arrays;
 
-@RunWith(value = Parameterized.class)
-public class DirectoryTotalSizeCalculatorTest {
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
+import org.junit.runners.Parameterized.Parameters;
 
-  @Rule
-  public TemporaryFolder folder = new TemporaryFolder();
+import com.google.guiceberry.junit4.GuiceBerryRule;
+import com.google.inject.Guice;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
 
-  private final int numThreads;
-  private final int fakeTimeStep;
+public class DirectoryTotalSizeTestByGuiceberry {
+  /*
+   * Here I don't know how to pass parameter "numThreads" and "fakeTimeStep"
+   * to the DirectoryTotalSizeTestEnv instance or GuiceBerryRule instance.
+   */
+  @Rule public GuiceBerryRule guiceBerry = 
+      new GuiceBerryRule(DirectoryTotalSizeTestEnv.class);
+  @Rule public TemporaryFolder folder = new TemporaryFolder();
+  @Inject DirectoryTotalSizeCalculator theCalculator;
+  private final int numThreads=4;
+  private final int fakeTimeStep=4;
   private String subFolderName = "subFolder";
-
-  /**
-   * Parameters are used to construct DirectoryTotalSizeCalculator and FakeTime objects.
-   */
-  public DirectoryTotalSizeCalculatorTest(int numThreads, int fakeTimeStep) {
-    this.numThreads = numThreads;
-    this.fakeTimeStep = fakeTimeStep;
-  }
-  
-
-
-  /**
-   * Provide parameters for the tests.
-   * 
-   */
-  @Parameters(name = "{index}: numThreads:{0}, fakeTimeStep:{1}")
-  public static Iterable<Object[]> data1() {
-    return Arrays.asList(new Object[][] { 
-        { 1, 5 },
-        { 5, 10 }, 
-        { 10, 1 },
-        { 20, 1 }, 
-        { 5, 200 },
-        { 10, 200 } 
-        });
-  }
 
   /**
    * Prepare a temporary directory for the test.
@@ -115,9 +92,6 @@ public class DirectoryTotalSizeCalculatorTest {
     out.print(stringInFile);
     out.close();
   }
-########## consider to combine the two addOneFile helper functions
-########## "The second addOneFile helper function is just a wrapper of the first"
-##########    + "one. Should I just delete the second one?"
   /**
    * Helper function to construct a new file with given size.
    * 

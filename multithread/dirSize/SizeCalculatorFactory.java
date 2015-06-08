@@ -14,7 +14,7 @@ import com.google.inject.name.Named;
  */
 public interface SizeCalculatorFactory {
   public DirectoryTotalSizeCalculator.SizeCalculator create(
-      @Assisted("index") Integer index, ######### have a better name other than index
+      @Assisted("rank") Integer rank,
       @Assisted LinkedBlockingQueue<String> subDirectoryName,
       @Assisted AtomicLong totalSize,
       @Assisted AtomicInteger fileInQueue,

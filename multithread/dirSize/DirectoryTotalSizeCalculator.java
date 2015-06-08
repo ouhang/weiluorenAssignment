@@ -1,11 +1,20 @@
 package dirSize;
 
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.PARAMETER;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
+import com.google.inject.BindingAnnotation;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
-import com.google.inject.name.Named;
+
+import currentTime.CurrentTime;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -14,7 +23,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 
-import currentTime.CurrentTime;
 
 /**
  * This class is used to compute the total size of certain directory with
@@ -34,9 +42,6 @@ public class DirectoryTotalSizeCalculator {
   private ExecutorService executorService;
   private final SizeCalculatorFactory factory;
   private final CurrentTime currentTime;
-
-######### delete empty lines
-
   /**
    * Method that is called only after a calling of "computeTotalSize" to get the
    * elapsed time of such calling.
@@ -71,7 +76,7 @@ public class DirectoryTotalSizeCalculator {
    */
   @Inject 
   public DirectoryTotalSizeCalculator(
-      @Named("numThreads") Integer numThreads,
+      @NumThreads Integer numThreads,
       SizeCalculatorFactory factory, 
       CurrentTime currentTime) {
     if (numThreads <= 0) {
@@ -86,6 +91,11 @@ public class DirectoryTotalSizeCalculator {
     this.currentTime = currentTime;
   }
 
+  @BindingAnnotation @Target({ FIELD, PARAMETER, METHOD }) @Retention(RUNTIME)
+  public @interface NumThreads {}
+
+  
+  
   /**
    * Compute the total size of the directory with name given as the parameter.
    * After calling this method, the user can call "getTotalSize" to get the
@@ -100,19 +110,12 @@ public class DirectoryTotalSizeCalculator {
    */
   public long computeTotalSize(String directoryName) throws InterruptedException {
     executorService = Executors.newFixedThreadPool(this.numThreads);
-
     startTime = currentTime.NowMillis();
-  
     subDirectoryName.put(directoryName);
-
     fileInQueue.set(1);
     totalSize.set(0);
-
     startThreads();
-###### delete empty lines
-
     executorService.invokeAll(workers);
-
     executorService.shutdown();
     elapsedTime = currentTime.NowMillis() - startTime;
     return totalSize.get();
@@ -123,8 +126,9 @@ public class DirectoryTotalSizeCalculator {
    * threads is given when the DirectoryTotalSize object is constructed.
    */
   private void startThreads() {
-    workers = new ArrayList<Callable<Integer>>(); ####### why initiate it every time starts the threads?
-
+    if (!workers.isEmpty()) {
+      workers.clear();
+    }
     for (int i = 0; i < numThreads; ++i) {
       workers.add(factory.create(i, subDirectoryName, totalSize, fileInQueue, numThreads));
     }
@@ -142,8 +146,11 @@ public class DirectoryTotalSizeCalculator {
    * 
    */
 ####### should this class be public ?
+####### "This class is made public so that the factory doing the assisted "
+#######    + "injection can access this class. Maybe we should make it private"
+#######    + "and don't do any Guice Injection for this class?"  
   public static class SizeCalculator implements Callable<Integer> {
-    private final int index;
+    private final int rank;
     private final LinkedBlockingQueue<String> subDirectoryName;
     private AtomicLong totalSize;
     private AtomicInteger fileInQueue;
@@ -151,12 +158,12 @@ public class DirectoryTotalSizeCalculator {
 
     @Inject 
     public SizeCalculator(
-        @Assisted("index") Integer index,
+        @Assisted("rank") Integer rank,
         @Assisted LinkedBlockingQueue<String> subDirectoryName,
         @Assisted AtomicLong totalSize,
         @Assisted AtomicInteger fileInQueue,
         @Assisted("numThreads") Integer numThreads) {
-      this.index = index;
+      this.rank = rank;
       this.subDirectoryName = subDirectoryName;
       this.totalSize = totalSize;
       this.fileInQueue = fileInQueue;
@@ -198,10 +205,10 @@ public class DirectoryTotalSizeCalculator {
      *         in the sub-directories of such directory.
      */
     private long calculateCurrentDirectorySize(String directoryName) {
-      // System.out.println(getName()+" "+directoryName+" ");
       File directory = new File(directoryName);
-      if (!(directory.isDirectory() && directory.canRead())) ########### {}
+      if (!(directory.isDirectory() && directory.canRead())) {
         throw new IllegalArgumentException();
+      }
       File[] allFiles = directory.listFiles();
       long directorySize = 0;
       for (File file : allFiles) {
@@ -220,10 +227,11 @@ public class DirectoryTotalSizeCalculator {
         }
       }
       synchronized (fileInQueue) {
-        if (fileInQueue.get() == 1) ##### add {}
+        if (fileInQueue.get() == 1) {
           addSpecialDirectoryNames();
-        else
+        } else {
           fileInQueue.decrementAndGet();
+        }
       }
       return directorySize;
     }
@@ -245,12 +253,13 @@ public class DirectoryTotalSizeCalculator {
      * the thread pool that all the tasks are done, and they can safely exit.
      */
     private void addSpecialDirectoryNames() {
-      for (int i = 0; i < numThreads; ++i) ###### add {}
+      for (int i = 0; i < numThreads; ++i) {
         try {
           subDirectoryName.put(specialDirectoryName);
         } catch (InterruptedException e) {
           e.printStackTrace();
         }
+      }
     }
   }
 
